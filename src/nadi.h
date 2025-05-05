@@ -40,18 +40,21 @@ struct nadi_message {
     unsigned long meta_hash; //value 0 is unused
     char* data; //raw bytes interpreted based on the contents of meta
     unsigned int data_length;
-    nadi_free_callback free_uadi_block;
-    nadi_instance_handle* instance;
+    nadi_free_callback free;
+    nadi_instance_handle instance;
     unsigned int channel;
 };
 
-DLL_EXPORT nadi_status nadi_init(nadi_instance_handle* instance, nadi_receive_callback*);
+DLL_EXPORT nadi_status nadi_init(nadi_instance_handle* instance, nadi_receive_callback);
 
 DLL_EXPORT nadi_status nadi_deinit(nadi_instance_handle instance);
 
 DLL_EXPORT nadi_status nadi_send(nadi_message* message);
 
 DLL_EXPORT void nadi_free(nadi_message*);
+
+//returns a non owning const string containing a JSON description of the nodes version, capabilities etc.
+DLL_EXPORT char* nadi_descriptor();
 
 #ifdef __cplusplus
 }
