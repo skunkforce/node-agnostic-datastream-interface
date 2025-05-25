@@ -18,7 +18,7 @@ target_compile_features(nadi INTERFACE cxx_std_20)
 # Installation rules
 include(GNUInstallDirs)
 install(TARGETS nadi
-    EXPORT NadiTargets
+    EXPORT nadiTargets
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
@@ -28,8 +28,8 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
 )
 
 # Export targets for find_package
-install(EXPORT NadiTargets
-    FILE NadiTargets.cmake
+install(EXPORT nadiTargets
+    FILE nadiTargets.cmake
     NAMESPACE nadi::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/nadi
 )
@@ -43,13 +43,13 @@ write_basic_package_version_file(
 )
 
 configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/NadiConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/NadiConfig.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/nadiConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/nadiConfig.cmake"
     @ONLY
 )
 
 install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/NadiConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/nadiConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/nadiConfigVersion.cmake"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/nadi
 )
