@@ -1,0 +1,429 @@
+asyncapi: 2.6.0
+info:
+  title: NADI (Node Agnostic Datastream Interface)
+  version: 1.0.0
+  description: AsyncAPI schema for the NADI interface, defining message schemas for datastream communication in a directional graph. Messages are JSON objects, mapped to the C ABI's nadi_message struct (meta → JSON string, data → bytes).
+servers:
+  nadi:
+    url: nadi://localhost
+    protocol: nadi
+    description: Generic NADI protocol for node communication.
+channels:
+  0xF100:
+    description: Mandatory configuration channel for nodes, used for input (configuration messages) and output (response messages).
+    publish:
+      message:
+        oneOf:
+          - $ref: '#/components/messages/node_connect'
+          - $ref: '#/components/messages/node_disconnect'
+    subscribe:
+      message:
+        oneOf:
+          - $ref: '#/components/messages/node_connect_confirm'
+          - $ref: '#/components/messages/node_disconnect_confirm'
+          - $ref: '#/components/messages/context_connect_confirm'
+          - $ref: '#/components/messages/context_disconnect_confirm'
+  0xF000:
+    description: Input channel on the context node (node handle 0) for commands, output channel on all nodes for query and command responses.
+    publish:
+      message:
+        oneOf:
+          - $ref: '#/components/messages/context_node_create'
+          - $ref: '#/components/messages/context_node_destroy'
+          - $ref: '#/components/messages/context_connect'
+          - $ref: '#/components/messages/context_disconnect'
+          - $ref: '#/components/messages/context_connections'
+          - $ref: '#/components/messages/context_abstract_nodes'
+          - $ref: '#/components/messages/context_nodes'
+    subscribe:
+      message:
+        oneOf:
+          - $ref: '#/components/messages/context_node_create_confirm'
+          - $ref: '#/components/messages/context_node_destroy_confirm'
+          - $ref: '#/components/messages/context_connections_list'
+          - $ref: '#/components/messages/context_abstract_nodes_list'
+          - $ref: '#/components/messages/context_nodes_list'
+components:
+  messages:
+    node_connect:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: node.connect
+            example: node.connect
+          source:
+            type: array
+            items:
+              type: integer
+            minItems: 2
+            maxItems: 2
+            example: [1234, 1234]
+          target:
+            type: integer
+            example: 61712
+          id:
+            type: string
+            example: conn1
+        required: [type, source, target]
+    node_disconnect:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: node.disconnect
+            example: node.disconnect
+          source:
+            type: array
+            items:
+              type: integer
+            minItems: 2
+            maxItems: 2
+            example: [1234, 1234]
+          target:
+            type: integer
+            example: 61712
+          id:
+            type: string
+            example: disconn1
+        required: [type, source, target]
+    context_node_create:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.node.create
+            example: context.node.create
+          abstract_name:
+            type: string
+            example: sensor_driver
+          instance_name:
+            type: string
+            example: sensor1
+          id:
+            type: string
+            example: create1
+        required: [type, abstract_name, instance_name]
+    context_node_destroy:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.node.destroy
+            example: context.node.destroy
+          instance_name:
+            type: string
+            example: sensor1
+          id:
+            type: string
+            example: destroy1
+        required: [type, instance_name]
+    context_connect:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.connect
+            example: context.connect
+          source:
+            type: array
+            items:
+              oneOf:
+                - type: string
+                - type: integer
+            minItems: 2
+            maxItems: 2
+            example: [1234, 1234]
+          destination:
+            type: array
+            items:
+              oneOf:
+                - type: string
+                - type: integer
+            minItems: 2
+            maxItems: 2
+            example: [5678, 61712]
+          id:
+            type: string
+            example: conn2
+        required: [type, source, destination]
+    context_disconnect:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.disconnect
+            example: context.disconnect
+          source:
+            type: array
+            items:
+              oneOf:
+                - type: string
+                - type: integer
+            minItems: 2
+            maxItems: 2
+            example: [1234, 1234]
+          destination:
+            type: array
+            items:
+              oneOf:
+                - type: string
+                - type: integer
+            minItems: 2
+            maxItems: 2
+            example: [5678, 61712]
+          id:
+            type: string
+            example: disconn2
+        required: [type, source, destination]
+    context_connections:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.connections
+            example: context.connections
+          id:
+            type: string
+            example: conn_query1
+        required: [type, id]
+    context_abstract_nodes:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.abstract_nodes
+            example: context.abstract_nodes
+          id:
+            type: string
+            example: abs_nodes1
+        required: [type, id]
+    context_nodes:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.nodes
+            example: context.nodes
+          id:
+            type: string
+            example: nodes1
+        required: [type, id]
+    node_connect_confirm:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: node.connect.confirm
+            example: node.connect.confirm
+          status:
+            type: string
+            example: success
+          message:
+            type: string
+            example: Connection established
+          id:
+            type: string
+            example: conn1
+        required: [type, status, id]
+    node_disconnect_confirm:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: node.disconnect.confirm
+            example: node.disconnect.confirm
+          status:
+            type: string
+            example: success
+          message:
+            type: string
+            example: Connection removed
+          id:
+            type: string
+            example: disconn1
+        required: [type, status, id]
+    context_connect_confirm:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.connect.confirm
+            example: context.connect.confirm
+          status:
+            type: string
+            example: success
+          id:
+            type: string
+            example: conn2
+        required: [type, status]
+    context_disconnect_confirm:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.disconnect.confirm
+            example: context.disconnect.confirm
+          status:
+            type: string
+            example: success
+          id:
+            type: string
+            example: disconn2
+        required: [type, status]
+    context_node_create_confirm:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.node.create.confirm
+            example: context.node.create.confirm
+          node:
+            type: integer
+            example: 1234
+          instance_name:
+            type: string
+            example: sensor1
+          id:
+            type: string
+            example: create1
+        required: [type, node, instance_name, id]
+    context_node_destroy_confirm:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.node.destroy.confirm
+            example: context.node.destroy.confirm
+          status:
+            type: string
+            example: success
+          id:
+            type: string
+            example: destroy1
+        required: [type, status]
+    context_connections_list:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.connections.list
+            example: context.connections.list
+          connections:
+            type: array
+            items:
+              type: object
+              properties:
+                source:
+                  type: array
+                  items:
+                    oneOf:
+                      - type: string
+                      - type: integer
+                  minItems: 2
+                  maxItems: 2
+                  example: [1234, 1234]
+                target:
+                  type: array
+                  items:
+                    oneOf:
+                      - type: string
+                      - type: integer
+                  minItems: 2
+                  maxItems: 2
+                  example: [5678, 61712]
+          id:
+            type: string
+            example: conn_query1
+        required: [type, connections, id]
+    context_abstract_nodes_list:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.abstract_nodes.list
+            example: context.abstract_nodes.list
+          instances:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: sensor_driver
+                version:
+                  type: string
+                  example: 1.0.0
+                description:
+                  type: string
+                  example: Temperature sensor driver
+                channels:
+                  type: object
+                  properties:
+                    input:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          number:
+                            type: integer
+                          name:
+                            type: string
+                          data types:
+                            type: array
+                            items:
+                              type: string
+                    output:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          number:
+                            type: integer
+                          name:
+                            type: string
+                          data types:
+                            type: array
+                            items:
+                              type: string
+          id:
+            type: string
+            example: abs_nodes1
+        required: [type, instances, id]
+    context_nodes_list:
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            const: context.nodes.list
+            example: context.nodes.list
+          instances:
+            type: array
+            items:
+              type: object
+              properties:
+                instance:
+                  type: string
+                  example: sensor1
+          id:
+            type: string
+            example: nodes1
+        required: [type, instances, id]
